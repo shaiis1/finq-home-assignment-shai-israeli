@@ -17,16 +17,24 @@ matter more than feature count. AI use is explicitly permitted but every line mu
   thumbnail, name (title+first+last), gender, country, phone, email. Filter by name + country.
   Click row → Screen 3.
 - **Screen 2 (`/saved`)**: same row UI, data from backend (`GET /api/profiles`).
-- **Screen 3 (`/profile/:source/:id`)**: large image, gender, editable name, age+birth year,
-  address (street number+name, city, state), email, phone.
-  - **Save** — visible only if source=random (not yet in DB) → `POST /api/profiles`.
-  - **Delete** — visible only if source=saved (already in DB) → `DELETE /api/profiles/:id`.
+- **Screen 3 (`/profile/:id`)**: large image, gender, editable name, age+birth year,
+  address (street number+name, city, state), email, phone. Routed by `id` alone — saved/unsaved
+  status is derived live from the shared Pinia collection (keyed by `login.uuid`), not baked into
+  the URL, since status can change mid-visit (e.g. right after Save). Navigation origin (`/random`
+  vs `/saved`) is tracked via route state, not a URL segment, so **Back** always returns to where
+  the user actually came from regardless of current saved status.
+  - **Save** — visible only when unsaved → `POST /api/profiles`. On success, row stays in Screen 1's
+    list (doesn't disappear) and gets a "Saved" badge.
+  - **Delete** — visible only when saved → `DELETE /api/profiles/:id`.
   - **Update** — name is editable; if saved → `PATCH /api/profiles/:id`; if not saved → update the
-    in-memory Screen 1 list via the Pinia store (this is why state must live in a store, not props).
-  - **Back** — navigate back.
+    shared Pinia collection only (this is why state must live in a store, not props/route params).
+  - **Back** — navigate to actual origin screen (Screen 1 or 2), never chosen by current save status.
   - **BiDi**: screen wrapper is `dir="rtl"` with Hebrew static labels; LTR-content fields (name,
     email, phone, street number) get `dir="ltr"` individually so they stay left-to-right and editable
     correctly inside the RTL layout.
+
+See `docs/planning/pm-breakdown.md` for the full save/update/delete state-machine acceptance
+criteria (flows A–D), filter UX rationale, and extension pick.
 
 ## Backend API contract
 
