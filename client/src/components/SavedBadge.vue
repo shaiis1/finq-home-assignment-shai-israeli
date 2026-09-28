@@ -1,5 +1,5 @@
 <script setup lang="ts"></script>
 
 <template>
-  <RouterView />
+  <span class="badge">Saved</span>
 </template>

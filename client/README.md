@@ -1,5 +1,42 @@
-# Vue 3 + TypeScript + Vite
+# client
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Frontend for the Finq home assignment — Vite + Vue 3 (Composition API, `<script setup>`) +
+TypeScript, Pinia, Vue Router. Plain CSS, no component library.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Prerequisites
+
+- Node.js 18+ and npm.
+
+## Install
+
+```bash
+npm install
+```
+
+## Run (dev)
+
+```bash
+npm run dev
+```
+
+Opens at `http://localhost:5173`.
+
+**Note:** the backend (`../server`) must also be running on `http://localhost:3001` for the
+"Saved" features (Screen 2/3 Save, Update-on-saved, Delete) to work — Screen 1's random-fetch
+list (`https://randomuser.me`) and local-only name edits (Flow B) work without it, but any action
+that hits `/api/profiles` will fail (and, thanks to the optimistic-update extension, visibly
+revert with an error banner) if the backend isn't up.
+
+## Build
+
+```bash
+npm run build
+```
+
+Runs `vue-tsc -b` (typecheck) then `vite build`, output in `dist/`.
+
+## Preview a production build
+
+```bash
+npm run preview
+```
