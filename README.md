@@ -34,8 +34,9 @@ random-fetch and local-only name edits work without it.
 
 - **`/`** — Home: two buttons, Fetch → `/random`, History → `/saved`.
 - **`/random`** — 10 random people from randomuser.me, filterable by name/country, click a row to
-  open its detail screen.
-- **`/saved`** — profiles persisted to the backend, same row UI and filter.
+  open its detail screen. Header nav links to `/saved`.
+- **`/saved`** — profiles persisted to the backend, same row UI and filter. Header nav links back
+  to `/random`.
 - **`/profile/:id`** — detail screen (RTL layout, Hebrew labels, LTR-isolated data fields):
   Save/Update/Delete depending on saved status, Back returns to wherever you came from.
 

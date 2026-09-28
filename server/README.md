@@ -16,6 +16,12 @@ cd server
 npm install
 ```
 
+## Environment variables
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `PORT` | `3001` | Port the Express server listens on. |
+
 ## Run (development)
 
 ```bash

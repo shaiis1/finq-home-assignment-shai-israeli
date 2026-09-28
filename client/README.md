@@ -13,6 +13,14 @@ TypeScript, Pinia, Vue Router. Plain CSS, no component library.
 npm install
 ```
 
+## Environment variables
+
+None required — the app works out of the box against the local backend. Optional override:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `VITE_API_BASE_URL` | `http://localhost:3001/api` | Backend base URL. See `.env.example`; copy to `.env.local` to override. |
+
 ## Run (dev)
 
 ```bash
