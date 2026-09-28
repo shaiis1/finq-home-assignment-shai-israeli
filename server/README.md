@@ -63,7 +63,8 @@ Basic liveness check.
 
 ### `GET /api/profiles`
 
-List all saved profiles.
+List all saved profiles. Optional `?limit=N` query param caps the number of rows returned (ordered
+oldest-first); omitted or invalid values return everything.
 
 - `200 OK`
   ```json

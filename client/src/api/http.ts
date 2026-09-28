@@ -1,7 +1,9 @@
 // Thin fetch wrapper: base URL, JSON parsing, typed error throwing.
 import type { ApiError } from '../types';
 
-export const API_BASE_URL = 'http://localhost:3001/api';
+// Overridable via VITE_API_BASE_URL (see .env.example) — defaults to the local dev server so
+// `npm run dev` works out of the box with no setup.
+export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://localhost:3001/api';
 
 export class HttpError extends Error {
   status: number;

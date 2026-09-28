@@ -14,6 +14,7 @@ const emit = defineEmits<{ click: [] }>();
       class="profile-row__thumbnail"
       :src="profile.picture.thumbnail"
       :alt="`${profile.name.first} ${profile.name.last}`"
+      loading="lazy"
     />
     <div class="profile-row__main">
       <div class="profile-row__name-line">

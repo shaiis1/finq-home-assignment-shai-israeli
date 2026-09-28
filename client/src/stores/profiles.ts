@@ -6,6 +6,7 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import type { Profile, ProfileName } from '../types';
 import { fetchRandomUsers } from '../api/randomUserApi';
+import { HttpError } from '../api/http';
 import {
   createProfile,
   deleteProfileOnServer,
@@ -18,6 +19,17 @@ type FetchStatus = 'idle' | 'loading' | 'success' | 'error';
 const SAVE_ERROR_MESSAGE = "Couldn't save — please try again";
 const UPDATE_ERROR_MESSAGE = "Couldn't update — please try again";
 const DELETE_ERROR_MESSAGE = "Couldn't delete — please try again";
+const NETWORK_ERROR_MESSAGE = 'Network error — check your connection and try again';
+
+// Surfaces the specific HTTP status behind a failed action instead of always showing the same
+// generic message (code review #12) — status 0 is http.ts's convention for "fetch itself threw."
+function describeActionError(err: unknown, fallback: string, statusMessages: Record<number, string> = {}): string {
+  if (err instanceof HttpError) {
+    if (err.status === 0) return NETWORK_ERROR_MESSAGE;
+    if (err.status in statusMessages) return statusMessages[err.status];
+  }
+  return fallback;
+}
 
 export const useProfilesStore = defineStore('profiles', () => {
   // ---- State ----
@@ -108,10 +120,12 @@ export const useProfilesStore = defineStore('profiles', () => {
     try {
       const saved = await createProfile(profilesById.value[id]);
       profilesById.value[id] = saved;
-    } catch {
+    } catch (err) {
       // Rollback.
       profilesById.value[id] = snapshot;
-      actionError.value = SAVE_ERROR_MESSAGE;
+      actionError.value = describeActionError(err, SAVE_ERROR_MESSAGE, {
+        409: 'This profile was already saved',
+      });
     } finally {
       pendingActionId.value = null;
     }
@@ -138,9 +152,11 @@ export const useProfilesStore = defineStore('profiles', () => {
     try {
       const updated = await updateProfileNameOnServer(id, name);
       profilesById.value[id] = updated;
-    } catch {
+    } catch (err) {
       profilesById.value[id] = { ...profilesById.value[id], name: previousName };
-      actionError.value = UPDATE_ERROR_MESSAGE;
+      actionError.value = describeActionError(err, UPDATE_ERROR_MESSAGE, {
+        404: 'This profile no longer exists — it may have been deleted elsewhere',
+      });
     } finally {
       pendingActionId.value = null;
     }
@@ -161,9 +177,11 @@ export const useProfilesStore = defineStore('profiles', () => {
 
     try {
       await deleteProfileOnServer(id);
-    } catch {
+    } catch (err) {
       profilesById.value[id] = snapshot;
-      actionError.value = DELETE_ERROR_MESSAGE;
+      actionError.value = describeActionError(err, DELETE_ERROR_MESSAGE, {
+        404: 'This profile was already deleted',
+      });
     } finally {
       pendingActionId.value = null;
     }

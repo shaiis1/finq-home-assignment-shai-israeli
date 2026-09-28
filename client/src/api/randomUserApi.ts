@@ -17,7 +17,7 @@ interface RandomUserResult {
   email: string;
   dob: { date: string; age: number };
   phone: string;
-  picture: { large: string; medium: string; thumbnail: string };
+  picture: { large: string; thumbnail: string };
   login: { uuid: string };
 }
 

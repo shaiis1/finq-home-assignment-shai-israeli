@@ -108,6 +108,7 @@ onUnmounted(() => {
           class="profile-detail__picture"
           :src="profile.picture.large"
           :alt="`${profile.name.first} ${profile.name.last}`"
+          loading="lazy"
         />
         <h1 class="ltr-field" dir="ltr">
           {{ profile.name.title }} {{ profile.name.first }} {{ profile.name.last }}
