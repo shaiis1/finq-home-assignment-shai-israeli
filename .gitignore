@@ -3,6 +3,8 @@ dist/
 .env
 .env.local
 *.db
+*.db-wal
+*.db-shm
 *.sqlite
 *.sqlite3
 .DS_Store

@@ -31,6 +31,11 @@ export const useProfilesStore = defineStore('profiles', () => {
   const savedError = ref<string | null>(null);
 
   const actionError = ref<string | null>(null);
+  // Guards Save/Update/Delete against overlapping requests for the same id — see QA finding M1
+  // (docs/planning/qa-report-backend.md): without this, a Save-then-Update fired before the POST
+  // resolves could PATCH a not-yet-created row, or a failed rollback could be clobbered by a
+  // still-in-flight success handler.
+  const pendingActionId = ref<string | null>(null);
 
   // ---- Getters ----
   // Deliberately derived, not stored — see architecture.md Section 2 ("no separate savedIds
@@ -91,10 +96,11 @@ export const useProfilesStore = defineStore('profiles', () => {
   /** Implements PM Flow A. `name` is the *current form value* — see architecture.md Section 2. */
   async function saveProfile(id: string, name: ProfileName): Promise<void> {
     const current = profilesById.value[id];
-    if (!current) return;
+    if (!current || pendingActionId.value === id) return;
 
     const snapshot: Profile = { ...current };
 
+    pendingActionId.value = id;
     // Optimistic: apply immediately, before the network call resolves.
     profilesById.value[id] = { ...current, name, savedInBackend: true };
     actionError.value = null;
@@ -106,21 +112,25 @@ export const useProfilesStore = defineStore('profiles', () => {
       // Rollback.
       profilesById.value[id] = snapshot;
       actionError.value = SAVE_ERROR_MESSAGE;
+    } finally {
+      pendingActionId.value = null;
     }
   }
 
   /** Implements PM Flows B (unsaved, local-only) and C (saved, PATCH). */
   async function updateProfileName(id: string, name: ProfileName): Promise<void> {
     const current = profilesById.value[id];
-    if (!current) return;
+    if (!current || pendingActionId.value === id) return;
 
     if (!current.savedInBackend) {
       // Flow B: no network call, mutate the shared collection only.
       profilesById.value[id] = { ...current, name };
+      actionError.value = null;
       return;
     }
 
     // Flow C: optimistic PATCH.
+    pendingActionId.value = id;
     const previousName = current.name;
     profilesById.value[id] = { ...current, name };
     actionError.value = null;
@@ -131,16 +141,19 @@ export const useProfilesStore = defineStore('profiles', () => {
     } catch {
       profilesById.value[id] = { ...profilesById.value[id], name: previousName };
       actionError.value = UPDATE_ERROR_MESSAGE;
+    } finally {
+      pendingActionId.value = null;
     }
   }
 
   /** Implements PM Flow D. */
   async function deleteProfile(id: string): Promise<void> {
     const current = profilesById.value[id];
-    if (!current) return;
+    if (!current || pendingActionId.value === id) return;
 
     const snapshot: Profile = { ...current };
 
+    pendingActionId.value = id;
     // Optimistic: flip the flag, don't delete the dict entry — see architecture.md Section 2
     // rationale (id may still be present in a currently-displayed random batch).
     profilesById.value[id] = { ...current, savedInBackend: false };
@@ -151,6 +164,8 @@ export const useProfilesStore = defineStore('profiles', () => {
     } catch {
       profilesById.value[id] = snapshot;
       actionError.value = DELETE_ERROR_MESSAGE;
+    } finally {
+      pendingActionId.value = null;
     }
   }
 
@@ -162,6 +177,7 @@ export const useProfilesStore = defineStore('profiles', () => {
     savedStatus,
     savedError,
     actionError,
+    pendingActionId,
     savedProfiles,
     randomBatchProfiles,
     getProfileById,

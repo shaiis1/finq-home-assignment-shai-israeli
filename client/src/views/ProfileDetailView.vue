@@ -21,6 +21,11 @@ const draftFirstName = ref('');
 
 const profile = computed(() => profilesStore.getProfileById(props.id));
 const birthYear = computed(() => (profile.value ? Number(profile.value.dob.slice(0, 4)) : null));
+// N2/M1 (qa-report-backend.md): block Save/Update while a name is blank/whitespace-only, and while
+// a request for this id is already in flight (prevents a fast Save→Update race — see store).
+const isNameValid = computed(() => draftFirstName.value.trim().length > 0);
+const isActionPending = computed(() => profilesStore.pendingActionId === props.id);
+const isMutationDisabled = computed(() => !isNameValid.value || isActionPending.value);
 
 async function ensureLoaded(): Promise<void> {
   loading.value = true;
@@ -122,6 +127,7 @@ onUnmounted(() => {
             v-model="draftFirstName"
             aria-label="First name"
           />
+          <p v-if="!isNameValid" class="field-error">First name can't be empty.</p>
         </dd>
 
         <dt>גיל</dt>
@@ -151,6 +157,7 @@ onUnmounted(() => {
           v-if="!profile.savedInBackend"
           class="button button--primary"
           type="button"
+          :disabled="isMutationDisabled"
           @click="handleSave"
         >
           Save
@@ -159,11 +166,14 @@ onUnmounted(() => {
           v-if="profile.savedInBackend"
           class="button button--danger"
           type="button"
+          :disabled="isActionPending"
           @click="handleDelete"
         >
           Delete
         </button>
-        <button class="button" type="button" @click="handleUpdate">Update</button>
+        <button class="button" type="button" :disabled="isMutationDisabled" @click="handleUpdate">
+          Update
+        </button>
         <button class="button" type="button" @click="goBack">Back</button>
       </div>
     </div>
@@ -221,6 +231,12 @@ onUnmounted(() => {
   font-size: 1rem;
   width: 100%;
   max-width: 240px;
+}
+
+.field-error {
+  margin: var(--space-1) 0 0;
+  color: var(--color-danger);
+  font-size: 0.8125rem;
 }
 
 .profile-detail__actions {
