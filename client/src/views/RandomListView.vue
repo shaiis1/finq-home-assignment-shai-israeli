@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router';
 import { useProfilesStore } from '../stores/profiles';
 import { useNavigationStore } from '../stores/navigation';
 import { useDebouncedFilter, matchesFilter } from '../composables/useDebouncedFilter';
+import AppHeader from '../components/AppHeader.vue';
 import ProfileRow from '../components/ProfileRow.vue';
 import ProfileFilterInput from '../components/ProfileFilterInput.vue';
 import ErrorBanner from '../components/ErrorBanner.vue';
@@ -41,6 +42,8 @@ onMounted(() => {
 
 <template>
   <main class="random-list">
+    <AppHeader />
+
     <header class="random-list__header">
       <h1>Random Profiles</h1>
       <div class="random-list__controls">
