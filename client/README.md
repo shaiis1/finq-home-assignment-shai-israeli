@@ -15,11 +15,18 @@ npm install
 
 ## Environment variables
 
-None required — the app works out of the box against the local backend. Optional override:
+None required — the app works out of the box against the local backend on `http://localhost:3001`.
+To point it somewhere else, copy the example file and edit it:
+
+```bash
+cp .env.example .env.local
+```
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `VITE_API_BASE_URL` | `http://localhost:3001/api` | Backend base URL. See `.env.example`; copy to `.env.local` to override. |
+| `VITE_API_BASE_URL` | `http://localhost:3001/api` | Backend base URL. |
+
+`.env.local` is gitignored — it's for your own local overrides, not committed.
 
 ## Run (dev)
 
